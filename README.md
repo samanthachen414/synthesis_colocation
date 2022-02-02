@@ -1,1 +1,1 @@
-# sythesis_colocation
+# synthesis_colocation
