@@ -1,0 +1,48 @@
+---
+title: "Initial graphs"
+author: 'By: Claire Gonzales'
+date: "2/7/2022"
+output: 
+  html_document: 
+    theme: lumen
+---
+
+### Overveiw
+
+This document will outline initial visualizations from co-location synthesis data. Inital questions that this data will attempt to address are as follows:
+
+- Is co-location research being conducted?
+- Where is it being conducted?
+- What are initial areas of opportunity being highlighted in the literature?
+- What are some potential obstacles being highlighted in the literature? 
+
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+
+library(tidyverse)
+library(here)
+library(lubridate)
+```
+
+### Reading in Data
+
+```{r}
+
+mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
+  
+```
+
+### Data subset
+
+Subset to only look at year and types of co-location. 
+
+```{r}
+data_sub1 <- mydata %>% 
+  select(first_author, year, country, aquaculture_present, wind_present, wave_present, tidal_present, other_present)
+
+ggplot(data = data_sub1, aes(x = year)) +
+  geom_histogram(binwidth = 1) +
+  theme_minimal()
+```
+
