@@ -18,11 +18,13 @@ This document will outline initial visualizations from co-location synthesis dat
 
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
 
 library(tidyverse)
 library(here)
 library(lubridate)
+library(plotly)
+library(DT)
 ```
 
 ### Reading in Data
@@ -33,16 +35,57 @@ mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
   
 ```
 
-### Data subset
+
+```{r}
+# I had to clean data again to put it in tidy format
+
+types <- read_csv(here("data", "data_types_tidy.csv"))
+```
+
+### Data subsets
 
 Subset to only look at year and types of co-location. 
 
 ```{r}
-data_sub1 <- mydata %>% 
-  select(first_author, year, country, aquaculture_present, wind_present, wave_present, tidal_present, other_present)
+data_sub <- mydata %>% 
+  select(first_author, year, country, aquaculture_present, wind_present, wave_present, tidal_present, other_present) %>% 
+  group_by(year) %>% 
+  summarize(count = n())
+  
 
-ggplot(data = data_sub1, aes(x = year)) +
-  geom_histogram(binwidth = 1) +
+# wrangling to group by types of co-location
+
+types_tidy <- types %>% 
+  select(first_author, year, title, activity_present) %>% 
+  mutate(activity_present = as.factor(activity_present)) %>% 
+  group_by(activity_present) %>% 
+  summarize(count = n()) %>% 
+  arrange(-count) %>% 
+  na.omit()
+  
+  
+
+```
+
+
+### Initial visualizations
+
+```{r}
+# count of publications over time
+
+ggplot(data = data_sub, aes(x = year, y = count)) +
+  geom_line(color = "darkgray") +
   theme_minimal()
+```
+
+```{r}
+# types of co-location
+### this needs to be fixed so that the data are in descending order. Not sure whats wrong
+
+g2 <- ggplot(data = types_tidy, aes(x = activity_present, y = count)) +
+  geom_col(fill = "darkgray")+
+  theme_minimal()
+
+ggplotly(g2)
 ```
 
