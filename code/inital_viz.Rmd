@@ -18,13 +18,21 @@ This document will outline initial visualizations from co-location synthesis dat
 
 
 ```{r setup, include=FALSE, message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
-
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 library(tidyverse)
 library(here)
 library(lubridate)
 library(plotly)
 library(DT)
+library(paletteer)
+library(ggbeeswarm)
+library(cowplot)
+# library(naniar)
+# library(rgl) not working
 ```
 
 ### Reading in Data
@@ -41,6 +49,16 @@ mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
 
 types <- read_csv(here("data", "data_types_tidy.csv"))
 ```
+
+```{r}
+# would love to be able to upload these all at once but alas...
+
+scores <- read_csv(here("data", "data_types_scores.csv"))
+
+scores_sub <- scores %>% 
+  select(first_author:other_present)
+```
+
 
 ### Data subsets
 
@@ -87,5 +105,119 @@ g2 <- ggplot(data = types_tidy, aes(x = activity_present, y = count)) +
   theme_minimal()
 
 ggplotly(g2)
+```
+
+
+```{r}
+# this doesn't work. reinstall xquartz.
+
+# score_3D <- ggplot(data = scores, aes(x = ecology_score, y = goverance_score, z = socioecon_scores)) +
+ # plot3d() +
+  # theme_minimal()
+  
+```
+
+```{r, include=FALSE}
+# trying 3d plot with plotly
+# this kinda works but something is wrong. PLus it looks bad
+plot_ly(scores_sub, x = ~ecology_score, y = ~governance_score, z = ~socioecon_score, type ="scatter3d", mode ="markers", color = ~aquaculture_present)
+```
+
+```{r, include=FALSE}
+# instead of doing a 3d plot, trying to view two panes (front view of data, side view of data)
+# try beeswarms?
+
+library(viridis)
+
+pane1 <- ggplot(data = scores_sub, aes(x = governance_score, y = ecology_score)) +
+  geom_point(aes(size = n(), color = aquaculture_present), alpha = 0.7) +
+  theme_minimal()
+
+
+pane2 <- ggplot(data = scores_sub, aes(x = socioecon_score, y = ecology_score)) +
+  geom_beeswarm() +
+  theme_minimal()
+```
+
+### Patching together graphs of ecology, governance and socio-econ
+
+```{r}
+# wrangling for ecology
+scores_sub_ecol <- scores_sub %>%
+  filter(ecology_score >0) 
+
+colnames <- c("aquaculture", "tidal", "wave", "wind", "other")
+
+ecol_col <- c(sum(scores_sub_ecol$aquaculture_present == "yes"),
+              sum(scores_sub_ecol$tidal_present == "yes"),
+              sum(scores_sub_ecol$wave_present == "yes"),
+              sum(scores_sub_ecol$wind_present == "yes"),
+              sum(scores_sub_ecol$other_present == "yes")
+)
+
+ecology_types <- data.frame(colnames, ecol_col)
+
+#governance
+scores_sub_gov <- scores_sub %>%
+  filter(governance_score >0) 
+
+
+gov_col <- c(sum(scores_sub_gov$aquaculture_present == "yes"),
+              sum(scores_sub_gov$tidal_present == "yes"),
+              sum(scores_sub_gov$wave_present == "yes"),
+              sum(scores_sub_gov$wind_present == "yes"),
+              sum(scores_sub_gov$other_present == "yes")
+)
+
+gov_types <- data.frame(colnames, gov_col)
+
+#socioeconomics
+scores_sub_socio <- scores_sub %>%
+  filter(socioecon_score >0) 
+
+socio_col <- c(sum(scores_sub_socio$aquaculture_present == "yes"),
+              sum(scores_sub_socio$tidal_present == "yes"),
+              sum(scores_sub_socio$wave_present == "yes"),
+              sum(scores_sub_socio$wind_present == "yes"),
+              sum(scores_sub_socio$other_present == "yes")
+)
+
+socio_types <- data.frame(colnames, socio_col)
+
+```
+
+```{r}
+# patching these together
+
+plot1 <- ggplot(data = ecology_types, aes(x = colnames, y = ecol_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "ocean activity",
+       y = "count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+
+
+plot2 <- ggplot(data = gov_types, aes(x = colnames, y = gov_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "ocean activity",
+       y = "count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+
+
+plot3 <- ggplot(data = socio_types, aes(x = colnames, y = socio_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "ocean activity",
+       y = "count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+plot_grid(plot1, plot2, plot3, labels = c('Ecology', 'Governance', 'Socio-economics'), label_size = 10, label_x = c(0.3, 0.3, 0.2), align = "h")
+
 ```
 
