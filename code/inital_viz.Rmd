@@ -52,6 +52,7 @@ types <- read_csv(here("data", "data_types_tidy.csv"))
 
 ```{r}
 # would love to be able to upload these all at once but alas...
+# this is the only data without orphans now
 
 scores <- read_csv(here("data", "data_types_scores.csv"))
 
@@ -91,9 +92,15 @@ types_tidy <- types %>%
 ```{r}
 # count of publications over time
 
-ggplot(data = data_sub, aes(x = year, y = count)) +
-  geom_line(color = "darkgray") +
-  theme_minimal()
+g1 <- ggplot(data = data_sub, aes(x = year, y = count)) +
+  geom_line(color = "darkgray", size = 1) +
+  labs(x = "Year",
+       y = "Count",
+       title = "Publication frequency over time (years 2000-2020)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(g1)
 ```
 
 ```{r}
@@ -101,8 +108,12 @@ ggplot(data = data_sub, aes(x = year, y = count)) +
 ### this needs to be fixed so that the data are in descending order. Not sure whats wrong
 
 g2 <- ggplot(data = types_tidy, aes(x = activity_present, y = count)) +
-  geom_col(fill = "darkgray")+
-  theme_minimal()
+  geom_col(fill = "darkgray") +
+  labs(x = "Activity type",
+       y = "Count",
+         title = "Frequency of co-located activity") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 
 ggplotly(g2)
 ```
@@ -191,8 +202,8 @@ socio_types <- data.frame(colnames, socio_col)
 
 plot1 <- ggplot(data = ecology_types, aes(x = colnames, y = ecol_col)) +
   geom_col(aes(fill = colnames)) +
-  labs(x = "ocean activity",
-       y = "count") +
+  labs(x = "Ocean activity",
+       y = "Count") +
   theme_minimal() +
   scale_fill_paletteer_d(palette = "calecopal::sierra2") +
   theme(legend.position= 'none')
@@ -201,8 +212,8 @@ plot1 <- ggplot(data = ecology_types, aes(x = colnames, y = ecol_col)) +
 
 plot2 <- ggplot(data = gov_types, aes(x = colnames, y = gov_col)) +
   geom_col(aes(fill = colnames)) +
-  labs(x = "ocean activity",
-       y = "count") +
+  labs(x = "Ocean activity",
+       y = "Count") +
   theme_minimal() +
   scale_fill_paletteer_d(palette = "calecopal::sierra2") +
   theme(legend.position= 'none')
@@ -211,8 +222,8 @@ plot2 <- ggplot(data = gov_types, aes(x = colnames, y = gov_col)) +
 
 plot3 <- ggplot(data = socio_types, aes(x = colnames, y = socio_col)) +
   geom_col(aes(fill = colnames)) +
-  labs(x = "ocean activity",
-       y = "count") +
+  labs(x = "Ocean activity",
+       y = "Count") +
   theme_minimal() +
   scale_fill_paletteer_d(palette = "calecopal::sierra2") +
   theme(legend.position= 'none')
