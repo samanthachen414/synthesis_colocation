@@ -132,7 +132,7 @@ ggsave(filename = here("figures", "publications_time.jpeg"), width = 6, height =
 # types of co-location
 ### this needs to be fixed so that the data are in descending order. Not sure whats wrong
 
-g2 <- ggplot(data = types_tidy_new, aes(x = as.factor(colnames_v1), y = types_counts)) +
+g2 <- ggplot(data = types_tidy_new, aes(x = factor(colnames_v1,levels = colnames_v1), y = types_counts)) +
   geom_bar(stat='identity', fill = "darkgray", width = 0.7) +
   labs(x = "Activity type",
        y = "Count",
