@@ -1,0 +1,63 @@
+---
+title: "Colocation Synthesis Data"
+author: "Samantha Chen"
+date: "3/8/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(broom)
+library(car)
+library(ggplot2)
+library(RColorBrewer)
+```
+
+# Load in data
+```{r}
+corpusdata <- read.csv("~/Froehlich Lab/GitHub/synthesis_colocation/Data_total_working_for_r_Claire_SC_v4.csv")
+```
+
+# Data Wrangling
+```{r}
+
+# rename the titles
+corpusdata1 <- corpusdata %>% 
+  rename(Author = first_author,
+         Year = year,
+         Title = title,
+         Country = country,
+         ID = LME.ID,
+         LME = LME,
+         Aquaculture = aquaculture_present,
+         Wind = wind_present,
+         Wave = wave_present,
+         Tidal = tidal_present,
+         Other = other_present)
+
+# subset out columns
+subbeddata <- corpusdata1 %>% 
+  select(Year, Title, Country, ID, LME, Aquaculture, Wind, Wave, Tidal, Other) %>% 
+  group_by(Year)
+```
+
+# Barplot
+```{r}
+# Count LME
+countLME <- subbeddata %>% group_by(LME) %>% tally()
+as.factor(countLME$LME)
+# Plot barplot using ggplot2
+LMEbarplot <- ggplot(data=countLME, aes(x=LME, y=n)) +
+  geom_bar(stat="identity") +
+  labs(x = "Large Marine Ecosystem", y = "Count") +
+  coord_flip()
+LMEbarplot
+```
+
