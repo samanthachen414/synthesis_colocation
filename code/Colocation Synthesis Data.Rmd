@@ -18,46 +18,58 @@ library(broom)
 library(car)
 library(ggplot2)
 library(RColorBrewer)
+library(here)
 ```
 
 # Load in data
 ```{r}
-corpusdata <- read.csv("~/Froehlich Lab/GitHub/synthesis_colocation/Data_total_working_for_r_Claire_SC_v4.csv")
+corpusdata <- read.csv(here("data", "Data_total_working_for_r.csv"))
 ```
 
 # Data Wrangling
 ```{r}
 
 # rename the titles
-corpusdata1 <- corpusdata %>% 
-  rename(Author = first_author,
-         Year = year,
-         Title = title,
-         Country = country,
-         ID = LME.ID,
-         LME = LME,
-         Aquaculture = aquaculture_present,
-         Wind = wind_present,
-         Wave = wave_present,
-         Tidal = tidal_present,
-         Other = other_present)
+# corpusdata1 <- corpusdata %>% 
+#   rename(Author = first_author,
+#          Year = year,
+#          Title = title,
+#          Country = country,
+#          ID = LME.ID,
+#          LME = LME,
+#          Aquaculture = aquaculture_present,
+#          Wind = wind_present,
+#          Wave = wave_present,
+#          Tidal = tidal_present,
+#          Other = other_present)
 
 # subset out columns
-subbeddata <- corpusdata1 %>% 
-  select(Year, Title, Country, ID, LME, Aquaculture, Wind, Wave, Tidal, Other) %>% 
-  group_by(Year)
+subbeddata <- corpusdata %>% 
+  select(year, title, country, lme) %>% 
+  group_by(year)
 ```
 
 # Barplot
 ```{r}
 # Count LME
-countLME <- subbeddata %>% group_by(LME) %>% tally()
-as.factor(countLME$LME)
+countLME <- subbeddata %>% 
+  group_by(lme) %>% 
+  tally() %>% 
+  arrange(n)
+
 # Plot barplot using ggplot2
-LMEbarplot <- ggplot(data=countLME, aes(x=LME, y=n)) +
-  geom_bar(stat="identity") +
+LMEbarplot <- ggplot(data=countLME, aes(x=factor(lme, levels = lme), y=n)) +
+  geom_bar(stat="identity", fill = "darkgray") +
   labs(x = "Large Marine Ecosystem", y = "Count") +
-  coord_flip()
+  coord_flip() +
+  theme_minimal()
+
 LMEbarplot
+```
+
+
+```{r, eval = FALSE}
+ggsave(filename = here("figures", "locations_bar.jpeg"), width = 6, height = 5, units = "in")
+
 ```
 
