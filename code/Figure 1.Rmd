@@ -1,0 +1,156 @@
+---
+title: "Figure 1 script"
+author: 'By: Claire Gonzales'
+date: "6/9/2022"
+output: html_document
+---
+
+## Description
+
+Figure 1 is going to be two panes. The first pane (Fig. 1a) will have total publications published over time. The second pane (Fig. 1b) will have three lines (ecology, governance, and socioeconomics) and will show the frequency of these types of publicatons over time. All three categories in pane 2 (Fig. 1b) will not add up to the total publications in pane 1 (Fig. 1a).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(here)
+library(lubridate)
+library(plotly)
+library(paletteer)
+library(cowplot)
+
+```
+
+### Reading in Data
+
+Data contains 'orphans'. 
+
+```{r}
+mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
+  
+```
+
+## Pane 1 Wrangling
+Subset to only look at year and types of co-location. 
+
+```{r}
+data_sub <- mydata %>% 
+  select(first_author, year, lme, ecology, governance, socioecon) %>% 
+  group_by(year) %>% 
+  summarize(count = n())
+
+```
+
+## Pane 1 Viz
+```{r}
+# Pane 1 (Fig. 1a)
+# count of publications over time
+
+g1 <- ggplot(data = data_sub, aes(x = year, y = count)) +
+  geom_line(color = "darkgray", size = .7) +
+  labs(x = "Year",
+       y = "Count",
+       title = "Publication frequency over time (years 2000-2020)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(g1)
+```
+
+## Pane 2 Wrangling
+```{r}
+# Need to rearrange the data for pane 2
+# Plan to create a subset that filters for all the ecology counts and totals them over time
+  # then do the same thing for govenance and socioecon
+  # then rbind them together
+
+data_sub_b_ecol <- mydata %>% 
+  select(first_author, year, lme, ecology) %>% 
+  group_by(year) %>% 
+  summarize(count = sum(ecology))
+
+ecology <- rep(c("Ecology"), times = 12)
+
+#colnames <- c("year", "discipline", "count")
+
+ecol_sub <- cbind(data_sub_b_ecol$year,
+              ecology,
+              data_sub_b_ecol$count)
+
+ecol_df <- data.frame(ecol_sub) %>% 
+  rename(year = V1) %>% 
+  rename(discipline = ecology) %>% 
+  rename(count = V3)
+```
+
+```{r}
+# same thing for socioeconomics section
+data_sub_b_socio <- mydata %>% 
+  select(first_author, year, lme, socioecon) %>% 
+  group_by(year) %>% 
+  summarize(count = sum(socioecon))
+
+socioecon <- rep(c("Socioeconomics"), times = 12)
+
+#can use the colnames value from above
+
+socio_sub <- cbind(data_sub_b_socio$year,
+              socioecon,
+              data_sub_b_socio$count)
+
+socio_df <- data.frame(socio_sub) %>% 
+  rename(year = V1) %>% 
+  rename(discipline = socioecon) %>% 
+  rename(count = V3)
+
+```
+
+```{r}
+# same thing for governance section
+data_sub_b_gov <- mydata %>% 
+  select(first_author, year, lme, governance) %>% 
+  group_by(year) %>% 
+  summarize(count = sum(governance))
+
+governance <- rep(c("Governance"), times = 12)
+
+#can use the colnames value from above
+
+gov_sub <- cbind(data_sub_b_gov$year,
+              governance,
+              data_sub_b_gov$count)
+
+gov_df <- data.frame(gov_sub) %>% 
+  rename(year = V1) %>% 
+  rename(discipline = governance) %>% 
+  rename(count = V3)
+```
+
+```{r}
+# rbinding the 3 dfs into one
+
+all_df <- rbind(ecol_df, gov_df, socio_df) %>% 
+  mutate(year = as.numeric(year)) %>% 
+  mutate(count = as.integer(count))
+
+# class was checked and its a data frame
+
+```
+
+## Pane 2 Viz
+
+```{r}
+g2 <- ggplot(data = all_df, aes(x = year, y = count)) +
+  geom_line(aes(color = discipline), size = .7) +
+  labs(x = "Year",
+       y = "Count",
+       title = "Publication frequency by discipline (years 2000-2020)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(g2)
+```
+
