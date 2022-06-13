@@ -52,19 +52,20 @@ data_sub <- mydata %>%
 g1 <- ggplot(data = data_sub, aes(x = year, y = count)) +
   geom_line(color = "darkgray", size = .7) +
   labs(x = "Year",
-       y = "Count",
-       title = "Publication frequency over time (years 2000-2020)") +
+       y = "Count") +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(axis.text.x = element_text(angle = 45))
 
 ggplotly(g1)
 ```
 
 ## Pane 2 Wrangling
+
+This might be semi sloppy code and there might be a cleaner way to do this but I'm not sure what that would be and I feel confident in the messy coding I've done here. 
 ```{r}
 # Need to rearrange the data for pane 2
 # Plan to create a subset that filters for all the ecology counts and totals them over time
-  # then do the same thing for govenance and socioecon
+  # then do the same thing for governance and socioecon
   # then rbind them together
 
 data_sub_b_ecol <- mydata %>% 
@@ -142,15 +143,26 @@ all_df <- rbind(ecol_df, gov_df, socio_df) %>%
 
 ## Pane 2 Viz
 
+Using ggplotly() here to allow us to look at each value, when needed. 
+
 ```{r}
 g2 <- ggplot(data = all_df, aes(x = year, y = count)) +
   geom_line(aes(color = discipline), size = .7) +
   labs(x = "Year",
-       y = "Count",
-       title = "Publication frequency by discipline (years 2000-2020)") +
+       y = "Count") +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(legend.title = element_blank(), legend.position= 'bottom', axis.text.x = element_text(angle = 45)) +
+  scale_colour_manual(values = c("Ecology" = "#00BA38", "Governance" = "#619CFF", "Socioeconomics" = "#F8766D"))
 
 ggplotly(g2)
 ```
 
+## Patching panes together
+
+Using cowplot package and `plot_grid()` to patch panes 1 and 2 together
+
+```{r}
+plot_grid(g1, g2, labels = c("A", "B"))
+```
+
+**Figure 1.** Shows frequency of publications over time (years 2000-2020). **Pane A** reflects the total frequency of co-location publications published over time. **Pane B** reflects the frequency of co-location publications, separated by publication discipline (ie ecology, governance or socioeconomics), published over time.  
