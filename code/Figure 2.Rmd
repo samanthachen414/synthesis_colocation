@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(tidyselect)
 library(here)
+library(paletteer)
+library(ggplot2)
 
 
 ```
@@ -123,11 +125,50 @@ other <- data_sub %>%
 ```{r}
 ## rbind these together and cbind the colnames to them
 
-rownames <- c("aquaculture", "wave", "wind", "tidal", "other")
+rownames <- c("aquaculture", "tidal", "wave", "wind", "other")
 
-total <- rbind(aq, wave, wind, tidal, other)
 
-total_df <- data.frame(cbind(rownames, total))
+total <- rbind(aq, tidal, wave, wind, other)
+
+# total_df <- data.frame(cbind(rownames, total))
+
 
 ```
+
+## Make it tidy
+
+```{r}
+
+activity <- as.factor(rep(c("Aquaculture", "Tidal", "Wave", "Wind", "Other"), 5))
+buddy <- as.factor(c(rep("Aquaculture", 5), rep("Tidal", 5), rep("Wave", 5), rep("Wind", 5), rep("Other", 5)))
+
+counts <- as.numeric(c(total$aquaculture,
+            total$tidal,
+            total$wave,
+            total$wind,
+            total$other))
+
+total_df_tidy <- 
+  data.frame(activity, buddy, counts) %>% 
+  filter(counts > 0)
+  
+
+```
+
+
+## Data Viz
+
+Stacked bar graph using a nice palette and make sure to alphabetize the axes
+
+```{r}
+ggplot(data = total_df_tidy, aes(x = activity, y = counts)) +
+  geom_bar(position="stack", stat="identity", aes(fill = buddy)) +
+  labs(x = "Ocean Activity",
+       y = "Count",
+       fill = "Co-located Activity") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::bigsur") +
+  theme(axis.text.x = element_text(angle = 30))
+```
+
 
