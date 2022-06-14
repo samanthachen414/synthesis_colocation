@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
 	warning = FALSE
 )
 library(tidyverse)
+library(tidyselect)
 library(here)
 
 
@@ -39,15 +40,94 @@ data_sub <- mydata %>%
 ```
 
 Trying to break it up into ocean activities and then creating a co-occurrence matrix within each ocean activity
-```{r, eval=FALSE}
+```{r}
 # start with aquaculture
 
 aq <- data_sub %>% 
   filter(aquaculture_present == "1") %>% 
-  group_by(id) %>% # I think changing this will help (maybe to wind present etc??) ugh idk
+  group_by(aquaculture_present) %>%
   summarize(
-    mutate(wind = sum(wind_present))
-  )
+   wind = sum(wind_present),
+   wave = sum(wave_present),
+   tidal = sum(tidal_present),
+   other = sum(other_present)
+  ) %>% 
+  mutate(aquaculture = "0") %>% 
+  select(sort(peek_vars())) %>% 
+  select(aquaculture, tidal, wave, wind, other)
+
+# now wave
+
+wave <- data_sub %>% 
+  filter(wave_present == "1") %>% 
+  group_by(wave_present) %>%
+  summarize(
+    aquaculture = sum(aquaculture_present),
+    wind = sum(wind_present),
+    tidal = sum(tidal_present),
+    other = sum(other_present)
+  ) %>% 
+  mutate(wave = "0") %>% 
+  select(sort(peek_vars())) %>% 
+  select(aquaculture, tidal, wave, wind, other)
+
+# now wind
+
+wind <- data_sub %>% 
+  filter(wind_present == "1") %>% 
+  group_by(wind_present) %>%
+  summarize(
+    aquaculture = sum(aquaculture_present),
+    wave = sum(wave_present),
+    tidal = sum(tidal_present),
+    other = sum(other_present)
+  ) %>% 
+  mutate(wind = "0") %>% 
+  select(sort(peek_vars())) %>% 
+  select(aquaculture, tidal, wave, wind, other)
+
+# now tidal
+
+tidal <- data_sub %>% 
+  filter(tidal_present == "1") %>% 
+  group_by(tidal_present) %>%
+  summarize(
+    aquaculture = sum(aquaculture_present),
+    wave = sum(wave_present),
+    wind = sum(wind_present),
+    other = sum(other_present)
+  ) %>% 
+  mutate(tidal = "0") %>% 
+  select(sort(peek_vars())) %>% 
+  select(aquaculture, tidal, wave, wind, other)
+
+# and 'other'
+
+other <- data_sub %>% 
+  filter(other_present == "1") %>% 
+  group_by(other_present) %>%
+  summarize(
+    aquaculture = sum(aquaculture_present),
+    wave = sum(wave_present),
+    wind = sum(wind_present),
+    tidal = sum(tidal_present)
+  ) %>% 
+  mutate(other = "0") %>% 
+  select(sort(peek_vars())) %>% 
+  select(aquaculture, tidal, wave, wind, other)
+
+
+# 10% manual QC was conducted to confirm that this code works
+```
+
+```{r}
+## rbind these together and cbind the colnames to them
+
+rownames <- c("aquaculture", "wave", "wind", "tidal", "other")
+
+total <- rbind(aq, wave, wind, tidal, other)
+
+total_df <- data.frame(cbind(rownames, total))
 
 ```
 
