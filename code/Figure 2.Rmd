@@ -1,0 +1,40 @@
+---
+title: "Figure 2"
+author: 'By: Claire Gonzales'
+date: "6/13/2022"
+output: html_document
+---
+
+Figure 2 is a stacked bar plot that show which ocean activities are co-located with eachother from all the publicaitons.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(here)
+
+
+```
+
+
+### Reading in Data
+
+Data contains 'orphans'. 
+
+```{r}
+mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
+  
+```
+
+## Wrangling
+
+First step will be to create a subset of the columns that are required
+
+```{r}
+data_sub <- mydata %>% 
+  select(first_author, year, aquaculture_present, wind_present, wave_present, tidal_present, other_present)
+```
+
