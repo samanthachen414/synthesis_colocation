@@ -35,6 +35,19 @@ First step will be to create a subset of the columns that are required
 
 ```{r}
 data_sub <- mydata %>% 
-  select(first_author, year, aquaculture_present, wind_present, wave_present, tidal_present, other_present)
+  select(id, aquaculture_present, wind_present, wave_present, tidal_present, other_present)
+```
+
+Trying to break it up into ocean activities and then creating a co-occurrence matrix within each ocean activity
+```{r, eval=FALSE}
+# start with aquaculture
+
+aq <- data_sub %>% 
+  filter(aquaculture_present == "1") %>% 
+  group_by(id) %>% # I think changing this will help (maybe to wind present etc??) ugh idk
+  summarize(
+    mutate(wind = sum(wind_present))
+  )
+
 ```
 
