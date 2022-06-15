@@ -18,6 +18,7 @@ library(tidyselect)
 library(here)
 library(paletteer)
 library(ggplot2)
+library(forcats)
 
 
 ```
@@ -151,6 +152,23 @@ counts <- as.numeric(c(total$aquaculture,
 total_df_tidy <- 
   data.frame(activity, buddy, counts) %>% 
   filter(counts > 0)
+
+
+# trying to embed levels in the factors so that it will order the way I want it to
+
+total_df_tidy$activity <- factor(total_df_tidy$activity,
+                                            levels = c("Aquaculture",
+                                                       "Tidal",
+                                                       "Wave",
+                                                       "Wind",
+                                                       "Other"))
+
+total_df_tidy$buddy <- factor(total_df_tidy$buddy,
+                                            levels = c("Aquaculture",
+                                                       "Tidal",
+                                                       "Wave",
+                                                       "Wind",
+                                                       "Other"))
   
 
 ```
@@ -171,4 +189,38 @@ ggplot(data = total_df_tidy, aes(x = activity, y = counts)) +
   theme(axis.text.x = element_text(angle = 30))
 ```
 
+
+
+```{r, eval=FALSE, include= FALSE}
+
+# NOTES FROM JULIET on how to fix the ordering problem of the x axis and legend
+# "Here Is an example of plot where I did this! It was tricky but you just have to redefine the column in the df with the nested `factors()` and `levels()` functions, then you can keep the code for the ggplot the same, just defining the x axis as the column name as you did before" 
+
+# hist_data_common_name$common_name <- factor(hist_data_common_name$common_name,
+#                                             levels = c("red fox",
+#                                                        "bobcat",
+#                                                        "striped skunk",
+#                                                        "raccoon", "rodents",
+#                                                        "brush rabbit",
+#                                                        "mountain lion",
+#                                                        "spotted skunk",
+#                                                        "gray fox",
+#                                                        "black bear",
+#                                                        "opossum"))
+# 
+# ggplot(hist_data_common_name, aes(x = common_name)) +
+#   geom_bar(aes(fill = site)) +
+#   ggtitle("Species Occurrence Across Santa Barbara, Summer 2018 - Winter 2019") +
+#   xlab("Species") + 
+#    ylab("Count") +
+#   scale_y_continuous(breaks = seq(00, 250, by = 25)) +
+#    theme(panel.background = element_blank(),
+#          axis.title.x = element_text(color = "black", face = "bold", size = 15),
+#          axis.text.x = element_text(color = "black", size = 10),
+#          axis.title.y = element_text(color = "black", face = "bold", size = 15),
+#          axis.text.y = element_text(color = "black", size = 12),
+#          plot.title = element_text(color="black", size = 11, face = "bold"),
+#          panel.border = element_rect(colour = "black", fill = NA, size = 2)) +
+#   scale_fill_brewer(palette = c("Set2"))
+```
 
