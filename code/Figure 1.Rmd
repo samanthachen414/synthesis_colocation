@@ -2,12 +2,18 @@
 title: "Figure 1 script"
 author: 'By: Claire Gonzales'
 date: "6/9/2022"
-output: html_document
+output: 
+  html_document: 
+    theme: lumen
+    code_folding: hide
 ---
 
-## Description
+### Description
 
-Figure 1 is going to be two panes. The first pane (Fig. 1a) will have total publications published over time. The second pane (Fig. 1b) will have three lines (ecology, governance, and socioeconomics) and will show the frequency of these types of publicatons over time. All three categories in pane 2 (Fig. 1b) will not add up to the total publications in pane 1 (Fig. 1a).
+**OBJECTIVE**: Figure 1 is going to be two panes. The first pane (Fig. 1a) will have total publications published over time. The second pane (Fig. 1b) will have three lines (ecology, governance, and socioeconomics) and will show the frequency of these types of publications over time. All three categories in pane 2 (Fig. 1b) will not add up to the total publications in pane 1 (Fig. 1a).
+
+**REFLECTIONS**: I'm trying to figure out if these visualizations are useful and informative. I think the story that they tell is that socioeconomics tends to be the leading discipline in current co-location literature. It makes sense for governance to be lower because policy pathways aren't yet established for co-location in most regions so there's isn't much to study in that discipline. However, ecology should be higher. In fact, we saw a widespread lack of ecological metrics, even in those publications that clearly were referring to the ecology of co-location. Call to action: future research should fill this gap. Not only do we need to collect baseline metrics when publishing co-location studies, but we also need to begin measuring environmental impacts from co-location activities, which has largely not been addressed.
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -33,7 +39,7 @@ mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
   
 ```
 
-## Pane 1 Wrangling
+### Pane 1 Wrangling
 Subset to only look at year and types of co-location. 
 
 ```{r}
@@ -44,7 +50,7 @@ data_sub <- mydata %>%
 
 ```
 
-## Pane 1 Viz
+### Pane 1 Viz
 ```{r}
 # Pane 1 (Fig. 1a)
 # count of publications over time
@@ -59,7 +65,7 @@ g1 <- ggplot(data = data_sub, aes(x = year, y = count)) +
 ggplotly(g1)
 ```
 
-## Pane 2 Wrangling
+### Pane 2 Wrangling
 
 This might be semi sloppy code and there might be a cleaner way to do this but I'm not sure what that would be and I feel confident in the messy coding I've done here. 
 ```{r}
@@ -141,7 +147,7 @@ all_df <- rbind(ecol_df, gov_df, socio_df) %>%
 
 ```
 
-## Pane 2 Viz
+### Pane 2 Viz
 
 Using ggplotly() here to allow us to look at each value, when needed. 
 
@@ -157,7 +163,7 @@ g2 <- ggplot(data = all_df, aes(x = year, y = count)) +
 ggplotly(g2)
 ```
 
-## Patching panes together
+### Patching panes together
 
 Using cowplot package and `plot_grid()` to patch panes 1 and 2 together
 

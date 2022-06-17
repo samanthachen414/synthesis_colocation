@@ -1,11 +1,22 @@
 ---
-title: "Figure 2"
+title: "Figure 2 script"
 author: 'By: Claire Gonzales'
 date: "6/13/2022"
-output: html_document
+output: 
+  html_document: 
+    theme: lumen
+    code_folding: hide
 ---
 
-Figure 2 is a stacked bar plot that show which ocean activities are co-located with eachother from all the publicaitons.
+### Description
+
+**OBJECTIVE**: Figure 2 is a stacked bar plot that show which ocean activities are co-located with each other from all the publications.
+
+**REFLECTIONS**: I'm fairly happy with these, but can't decide if the visualization showing counts or percentage is more informative. Also, should I create a table/co-occurrence matrix with the final counts?
+
+I think this visualization would be a good way to lead into the aquaculture deep dive because we can see here that aquaculture is doing something different than the other sectors. With the other sectors, the most established forms of technology are being co-located more. However, aquaculture is the most established system (foundational literature dates back decades and there is a robust amount of it), but is not being co-located as frequently. It is being referenced as a co-location option slightly less than wave energy, which is a fairly new technology. So, we need to take a closer look at what is happening with aquaculture here. 
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -33,7 +44,7 @@ mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
   
 ```
 
-## Wrangling
+### Wrangling
 
 First step will be to create a subset of the columns that are required
 
@@ -131,12 +142,12 @@ rownames <- c("aquaculture", "tidal", "wave", "wind", "other")
 
 total <- rbind(aq, tidal, wave, wind, other)
 
-# total_df <- data.frame(cbind(rownames, total))
-
+# total_df <- data.frame(cbind(rownames, total)) 
+# nothing wrong with this, but it isn't necessary for anything
 
 ```
 
-## Make it tidy
+### Make it tidy
 
 ```{r}
 
@@ -169,12 +180,17 @@ total_df_tidy$buddy <- factor(total_df_tidy$buddy,
                                                        "Wave",
                                                        "Wind",
                                                        "Other"))
+
+# for n values and inline coding
+sum <- total_df_tidy %>% 
+  group_by(activity) %>% 
+  summarize(total = sum(counts))
   
 
 ```
 
 
-## Data Viz
+### Data Viz 1
 
 Stacked bar graph using a nice palette and make sure to alphabetize the axes
 
@@ -189,6 +205,28 @@ ggplot(data = total_df_tidy, aes(x = activity, y = counts)) +
   theme(axis.text.x = element_text(angle = 30))
 ```
 
+**Figure 2** Shows each ocean activity and its frequency of co-location with another ocean activity. Wind energy was most often referenced being co-located with other ocean activities (n = `r sum$total[4]`), followed by wave energy (n = `r sum$total[3]`), aquaculture (n = `r sum$total[1]`), and tidal energy (n = `r sum$total[2]`). Other forms of marine energy or ocean activities were referenced being co-located with other ocean activities `r sum$total[5]` times. Many publications referenced multiple interacting co-locating activities. Instances in which ocean activities are co-located with themselves are not considered here.  
+
+
+### Data Viz 2
+
+Trying another approach using percentage instead of counts.
+
+```{r}
+ggplot(data = total_df_tidy, aes(x = activity, y = counts)) +
+  geom_bar(position="fill", stat="identity", aes(fill = buddy)) +
+  labs(x = "Ocean Activity",
+       y = "Percentage",
+       fill = "Co-located Activity") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::bigsur") +
+  theme(axis.text.x = element_text(angle = 30)) +
+  geom_text(aes("Aquaculture",1.03,label = "n=80", hjust= .5), size = 3) + # n values from sums df
+  geom_text(aes("Tidal",1.03,label = "n=47", hjust= .5), size = 3) +
+  geom_text(aes("Wave",1.03,label = "n=85", hjust= .5), size = 3) +
+  geom_text(aes("Wind",1.03,label = "n=116", hjust= .5), size = 3) +
+  geom_text(aes("Other",1.03,label = "n=66", hjust= .5), size = 3)
+```
 
 
 ```{r, eval=FALSE, include= FALSE}
