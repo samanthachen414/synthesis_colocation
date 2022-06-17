@@ -1,0 +1,64 @@
+---
+title: "Figure 3 script"
+author: 'By: Claire Gonzales'
+date: '2022-06-17'
+output: 
+  html_document: 
+    theme: lumen
+    code_folding: hide
+---
+
+### Description
+
+**OBJECTIVE**: This will be a spatial visualization of where co-location is being considered. Current plan is to use R to only create the data frame that we need and then use tableau to create the visualization (hopefully.)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+library(tidyverse)
+library(here)
+library(paletteer)
+library(ggplot2)
+
+```
+
+
+### Reading in Data
+
+Data contains 'orphans'. 
+
+```{r}
+mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
+  
+```
+
+### Wrangling
+
+We have figured out the code for this section a couple months ago in the lme_code.Rmd script to put the necessary lme data into tidy format.
+
+```{r}
+lme_clean <- mydata %>% 
+  select(id, lme1, lme2, lme3, lme4, lme5, lme6)
+
+lme_tidy <- lme_clean %>% 
+  gather("df", "lme", 2:7, na.rm = TRUE) %>% # output at this stage was QC'd to make sure that the code worked (it did!)
+  group_by(lme) %>% 
+  summarize (
+    count = n()
+  )
+
+# this output shows each lme (by name) and how many times that lme is referenced in the literature. North Sea far in the lead, being mentioned 34 times. 
+
+# > class(lme_tidy$lme)
+# [1] "character"
+# > class(lme_tidy$count)
+# [1] "integer"
+
+# classes might have to be changed to factor and numeric in future
+```
+
