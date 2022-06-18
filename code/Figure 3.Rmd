@@ -62,3 +62,45 @@ lme_tidy <- lme_clean %>%
 # classes might have to be changed to factor and numeric in future
 ```
 
+```{r}
+write.csv(lme_tidy, here("data", "lme_tidy.csv"))
+```
+
+### Tableau Viz
+
+Tableau figure can be found here: https://public.tableau.com/app/profile/claire.gonzales/viz/synthesis_figure3/Sheet3
+
+Honestly, I don't love it? I feel like it falls a little flat.
+
+### R Viz
+
+I am going to try my hand at an r visualization using `geom_sf` to see if I can create something a little better that way.
+
+```{r}
+# install.packages(c("cowplot", "googleway", "ggplot2", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+
+library("ggplot2")
+theme_set(theme_bw())
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+```
+
+Let's load some data.
+```{r}
+
+world <- ne_countries(scale = "medium", returnclass = "sf") 
+# this provides a map of countries of the entire world. Use ne_countries to pull country data and choose the scale
+
+locations <- read_csv(here("data", "lme_tidy_location.csv"))
+# this is the locations of the lmes (not a shapefile)
+
+```
+
+And now try to make a preliminary map
+```{r}
+ggplot(data = world) +
+  geom_sf() +
+  geom_point(data = locations, aes(x = long, y = lat, size = count), shape = 23, fill = "darkred")
+```
+
