@@ -8,11 +8,6 @@ output:
     code_folding: hide
 ---
 
-### Description
-
-**OBJECTIVE**: This will be a spatial visualization of where co-location is being considered. Current plan is to use R to only create the data frame that we need and then use tableau to create the visualization (hopefully.)
-
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -24,9 +19,23 @@ library(tidyverse)
 library(here)
 library(paletteer)
 library(ggplot2)
+library(cowplot)
 
 ```
 
+### Description
+
+**OBJECTIVE**: This will be a spatial visualization of where co-location is being considered. Current plan is to use R to only create the data frame that we need and then use tableau to create the visualization (hopefully.)
+
+**REFLECTIONS**: This was a bit of a wild ride but I think we are on the right track now. I tried using some r tools for this visualization but I think Tableau is nicer and was a bit easier to handle. Working Tableau visualization is [here](https://public.tableau.com/app/profile/claire.gonzales/viz/synthesis_figure3_polygons/Dashboard1?publish=yes) and inserted below. Will still need improvements/edits, but I feel like this is a good starting point. 
+
+<!-- ![Figure 3 Draft](fig3_tableau.jpg) -->
+
+```{r}
+knitr::include_graphics(here("figures", "fig3_tableau.jpg"))
+```
+
+The following code will show my work flow, but future edits should be made through Tableau at the link above (unless it has to do with the data themselves).
 
 ### Reading in Data
 
@@ -99,8 +108,31 @@ locations <- read_csv(here("data", "lme_tidy_location.csv"))
 
 And now try to make a preliminary map
 ```{r}
+# map1 <- 
+  
 ggplot(data = world) +
   geom_sf() +
-  geom_point(data = locations, aes(x = long, y = lat, size = count), shape = 23, fill = "darkred")
+  geom_point(data = locations, aes(x = long, y = lat, size = count), shape = 21, fill = "darkblue") +
+  coord_sf(xlim = c(-160, 179), expand = FALSE) +
+  theme(legend.title = element_blank(), legend.position= 'bottom')
 ```
 
+This is a fine approach. Visually, I still think the tableau version is better. I tried adjusting the x and y limits to zoom in a bit, but keep getting an error message for the ylim. I am going to try adding a second pane. Via tableau I will try to add an inset.
+
+```{r}
+# map2 <- 
+  
+ggplot(data = world) +
+  geom_sf() +
+  geom_point(data = locations, aes(x = long, y = lat, size = count), shape = 21, fill = "darkblue") +
+  coord_sf(xlim = c(-15, 25), ylim = c(25, 65), expand = FALSE) +
+  theme(legend.position="none")
+```
+
+
+
+```{r, include=FALSE, eval=FALSE}
+# Using cowplot package and `plot_grid()` to patch maps 1 and 2 together
+
+plot_grid(map1, map2, labels = c("A", "B"))
+```
