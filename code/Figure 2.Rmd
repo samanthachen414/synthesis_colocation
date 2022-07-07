@@ -205,7 +205,12 @@ ggplot(data = total_df_tidy, aes(x = activity, y = counts)) +
   theme(axis.text.x = element_text(angle = 30))
 ```
 
-**Figure 2** Shows each ocean activity and its frequency of co-location with another ocean activity. Wind energy was most often referenced being co-located with other ocean activities (n = `r sum$total[4]`), followed by wave energy (n = `r sum$total[3]`), aquaculture (n = `r sum$total[1]`), and tidal energy (n = `r sum$total[2]`). Other forms of marine energy or ocean activities were referenced being co-located with other ocean activities `r sum$total[5]` times. Many publications referenced multiple interacting co-locating activities. Instances in which ocean activities are co-located with themselves are not considered here.  
+**Figure 2.** Shows each ocean activity and its frequency of co-location with another ocean activity. Wind energy was most often referenced being co-located with other ocean activities (n = `r sum$total[4]`), followed by wave energy (n = `r sum$total[3]`), aquaculture (n = `r sum$total[1]`), and tidal energy (n = `r sum$total[2]`). Other forms of marine energy or ocean activities were referenced being co-located with other ocean activities `r sum$total[5]` times. Many publications referenced multiple interacting co-locating activities. Instances in which ocean activities are co-located with themselves are not considered here.  
+
+```{r, eval = FALSE, include=FALSE}
+ggsave(filename = here("figures", "fig2.jpeg"), width = 7, height = 5, units = "in")
+```
+
 
 
 ### Data Viz 2

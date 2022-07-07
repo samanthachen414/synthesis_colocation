@@ -44,7 +44,7 @@ Subset to only look at year and types of co-location.
 
 ```{r}
 data_sub <- mydata %>% 
-  select(first_author, year, lme, ecology, governance, socioecon) %>% 
+  select(first_author, year, ecology, governance, socioecon) %>% 
   group_by(year) %>% 
   summarize(count = n())
 
@@ -75,7 +75,7 @@ This might be semi sloppy code and there might be a cleaner way to do this but I
   # then rbind them together
 
 data_sub_b_ecol <- mydata %>% 
-  select(first_author, year, lme, ecology) %>% 
+  select(first_author, year, ecology) %>% 
   group_by(year) %>% 
   summarize(count = sum(ecology))
 
@@ -96,7 +96,7 @@ ecol_df <- data.frame(ecol_sub) %>%
 ```{r}
 # same thing for socioeconomics section
 data_sub_b_socio <- mydata %>% 
-  select(first_author, year, lme, socioecon) %>% 
+  select(first_author, year, socioecon) %>% 
   group_by(year) %>% 
   summarize(count = sum(socioecon))
 
@@ -118,7 +118,7 @@ socio_df <- data.frame(socio_sub) %>%
 ```{r}
 # same thing for governance section
 data_sub_b_gov <- mydata %>% 
-  select(first_author, year, lme, governance) %>% 
+  select(first_author, year, governance) %>% 
   group_by(year) %>% 
   summarize(count = sum(governance))
 
@@ -169,6 +169,9 @@ Using cowplot package and `plot_grid()` to patch panes 1 and 2 together
 
 ```{r}
 plot_grid(g1, g2, labels = c("A", "B"))
+
+# ggsave(filename = here("figures", "fig1.jpeg"), width = 7, height = 4, units = "in")
+
 ```
 
 **Figure 1.** Shows frequency of publications over time (years 2000-2020). **Pane A** reflects the total frequency of co-location publications published over time. **Pane B** reflects the frequency of co-location publications, separated by publication discipline (ie ecology, governance or socioeconomics), published over time.  
