@@ -1,0 +1,75 @@
+---
+title: "Colocation Synthesis Data"
+author: "Samantha Chen"
+date: "3/8/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Load packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(broom)
+library(car)
+library(ggplot2)
+library(RColorBrewer)
+library(here)
+```
+
+# Load in data
+```{r}
+corpusdata <- read.csv(here("data", "Data_total_working_for_r.csv"))
+```
+
+# Data Wrangling
+```{r}
+
+# rename the titles
+# corpusdata1 <- corpusdata %>% 
+#   rename(Author = first_author,
+#          Year = year,
+#          Title = title,
+#          Country = country,
+#          ID = LME.ID,
+#          LME = LME,
+#          Aquaculture = aquaculture_present,
+#          Wind = wind_present,
+#          Wave = wave_present,
+#          Tidal = tidal_present,
+#          Other = other_present)
+
+# subset out columns
+subbeddata <- corpusdata %>% 
+  select(year, title, country, lme) %>% 
+  group_by(year)
+```
+
+# Barplot
+```{r}
+# Count LME
+countLME <- subbeddata %>% 
+  group_by(lme) %>% 
+  tally() %>% 
+  arrange(n)
+
+# Plot barplot using ggplot2
+LMEbarplot <- ggplot(data=countLME, aes(x=factor(lme, levels = lme), y=n)) +
+  geom_bar(stat="identity", fill = "darkgray") +
+  labs(x = "Large Marine Ecosystem", y = "Count") +
+  coord_flip() +
+  theme_minimal()
+
+LMEbarplot
+```
+
+
+```{r, eval = FALSE}
+ggsave(filename = here("figures", "locations_bar.jpeg"), width = 6, height = 5, units = "in")
+
+```
+

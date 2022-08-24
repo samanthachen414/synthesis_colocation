@@ -1,0 +1,269 @@
+---
+title: "Initial graphs"
+author: 'By: Claire Gonzales'
+date: "3/17/2022"
+output: 
+  html_document: 
+    theme: lumen
+---
+
+### Overveiw
+
+This document will outline initial visualizations from co-location synthesis data. Inital questions that this data will attempt to address are as follows:
+
+- Is co-location research being conducted?
+- Where is it being conducted?
+- What are initial areas of opportunity being highlighted in the literature?
+- What are some potential obstacles being highlighted in the literature? 
+
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+library(tidyverse)
+library(here)
+library(lubridate)
+library(plotly)
+# library(DT)
+library(paletteer)
+# library(ggbeeswarm)
+library(cowplot)
+# library(naniar)
+# library(rgl) not working
+```
+
+### Reading in Data
+
+Data contains 'orphans'. 
+
+```{r}
+
+mydata <- read_csv(here("data", "Data_total_working_for_r.csv"))
+  
+```
+
+
+```{r}
+# I had to clean data again to put it in tidy format
+
+types <- read_csv(here("data", "data_types_tidy.csv"))
+```
+
+```{r}
+# would love to be able to upload these all at once but alas...
+# this is the only data without orphans now
+
+scores <- read_csv(here("data", "data_types_scores.csv"))
+
+scores_sub <- scores %>%
+  select(first_author:other_present)
+```
+
+
+### Data subsets
+
+Subset to only look at year and types of co-location. 
+
+```{r}
+data_sub <- mydata %>% 
+  select(first_author, year, country, aquaculture_present, wind_present, wave_present, tidal_present, other_present) %>% 
+  group_by(year) %>% 
+  summarize(count = n())
+  
+
+```
+
+
+```{r}
+# wrangling to group by types of co-location
+
+types_tidy <- types %>% 
+  select(first_author, year, title, activity_present) %>% 
+  mutate(activity_present = as.factor(activity_present)) %>% 
+  group_by(activity_present) %>% 
+  summarize(act_count = n()) %>% 
+  arrange(-act_count) %>% 
+  na.omit()
+
+
+# trying creating a new data frame for the values so maybe the ggplot will be happier
+
+colnames_v1 <- c("wind", "wave", "aquaculture", "tidal", "other")
+
+types_counts <- c(types_tidy$act_count[1],
+                  types_tidy$act_count[2],
+                  types_tidy$act_count[3],
+                  types_tidy$act_count[5],
+                  types_tidy$act_count[4])
+
+
+types_tidy_new <- data.frame(colnames_v1, types_counts)
+
+```
+
+
+### Initial visualizations
+
+```{r}
+# count of publications over time
+
+g1 <- ggplot(data = data_sub, aes(x = year, y = count)) +
+  geom_line(color = "darkgray", size = .7) +
+  labs(x = "Year",
+       y = "Count",
+       title = "Publication frequency over time (years 2000-2020)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(g1)
+```
+
+
+```{r, eval = FALSE}
+ggsave(filename = here("figures", "publications_time.jpeg"), width = 6, height = 5, units = "in")
+
+```
+
+
+```{r}
+# types of co-location
+
+g2 <- ggplot(data = types_tidy_new, aes(x = factor(colnames_v1,levels = colnames_v1), y = types_counts)) +
+  geom_bar(stat='identity', fill = "darkgray", width = 0.7) +
+  labs(x = "Activity type",
+       y = "Count",
+         title = "Frequency of co-located activity") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplotly(g2)
+```
+
+
+```{r, eval = FALSE}
+ggsave(filename = here("figures", "ocean_activities_bar.jpeg"), width = 6, height = 5, units = "in")
+
+```
+
+### Patching together graphs of ecology, governance and socio-econ
+
+So far the trends here seem to be consistent across the three categories.
+
+```{r}
+# wrangling for ecology
+scores_sub_ecol <- scores_sub %>%
+  filter(ecology_score >0) 
+
+colnames <- c("aquaculture", "tidal", "wave", "wind", "other")
+
+ecol_col <- c(sum(scores_sub_ecol$aquaculture_present == "yes"),
+              sum(scores_sub_ecol$tidal_present == "yes"),
+              sum(scores_sub_ecol$wave_present == "yes"),
+              sum(scores_sub_ecol$wind_present == "yes"),
+              sum(scores_sub_ecol$other_present == "yes")
+)
+
+ecology_types <- data.frame(colnames, ecol_col)
+
+# governance
+scores_sub_gov <- scores_sub %>%
+  filter(governance_score >0) 
+
+
+gov_col <- c(sum(scores_sub_gov$aquaculture_present == "yes"),
+              sum(scores_sub_gov$tidal_present == "yes"),
+              sum(scores_sub_gov$wave_present == "yes"),
+              sum(scores_sub_gov$wind_present == "yes"),
+              sum(scores_sub_gov$other_present == "yes")
+)
+
+gov_types <- data.frame(colnames, gov_col)
+
+# socioeconomics
+scores_sub_socio <- scores_sub %>%
+  filter(socioecon_score >0) 
+
+socio_col <- c(sum(scores_sub_socio$aquaculture_present == "yes"),
+              sum(scores_sub_socio$tidal_present == "yes"),
+              sum(scores_sub_socio$wave_present == "yes"),
+              sum(scores_sub_socio$wind_present == "yes"),
+              sum(scores_sub_socio$other_present == "yes")
+)
+
+socio_types <- data.frame(colnames, socio_col)
+
+```
+
+```{r}
+# patching these together
+
+plot1 <- ggplot(data = ecology_types, aes(x = colnames, y = ecol_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "Ocean activity",
+       y = "Count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+
+
+plot2 <- ggplot(data = gov_types, aes(x = colnames, y = gov_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "Ocean activity",
+       y = "Count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+
+plot3 <- ggplot(data = socio_types, aes(x = colnames, y = socio_col)) +
+  geom_col(aes(fill = colnames)) +
+  labs(x = "Ocean activity",
+       y = "Count") +
+  theme_minimal() +
+  scale_fill_paletteer_d(palette = "calecopal::sierra2") +
+  theme(legend.position= 'none')
+
+plot_grid(plot1, plot2, plot3, labels = c('Ecology', 'Governance', 'Socio-economics'), label_size = 10, label_x = c(0.3, 0.3, 0.2), align = "h")
+
+```
+
+
+
+### Graveyard
+Old code that doesn't work but we will always remember it fondly
+
+```{r, eval = FALSE}
+# this doesn't work. reinstall xquartz.
+
+# score_3D <- ggplot(data = scores, aes(x = ecology_score, y = goverance_score, z = socioecon_scores)) +
+ # plot3d() +
+  # theme_minimal()
+  
+```
+
+```{r, eval=FALSE}
+# trying 3d plot with plotly
+# this kinda works but something is wrong. PLus it looks bad
+# plot_ly(scores_sub, x = ~ecology_score, y = ~governance_score, z = ~socioecon_score, type ="scatter3d", mode ="markers", color = ~aquaculture_present)
+```
+
+```{r, eval=FALSE}
+# instead of doing a 3d plot, trying to view two panes (front view of data, side view of data)
+# try beeswarms?
+# 
+# library(viridis)
+# 
+# pane1 <- ggplot(data = scores_sub, aes(x = governance_score, y = ecology_score)) +
+#   geom_point(aes(size = n(), color = aquaculture_present), alpha = 0.7) +
+#   theme_minimal()
+# 
+# 
+# pane2 <- ggplot(data = scores_sub, aes(x = socioecon_score, y = ecology_score)) +
+#   geom_beeswarm() +
+#   theme_minimal()
+```
+
